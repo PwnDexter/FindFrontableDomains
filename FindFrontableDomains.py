@@ -32,6 +32,8 @@ class ThreadLookup(threading.Thread):
                             print 'CloundFront Frontable domain found: ' + str(hostname) + " " + str(target)
                         elif 'ghs.googlehosted.com' in target:
                             print 'Google Frontable domain found: ' + str(hostname) + " " + str(target)
+                        elif 'appspot.com' in target:
+                            print 'Appspot (Old) Frontable domain found: ' + str(hostname) + " " + str(target)
                         elif 'msecnd.net' in target:
                             print 'Azure Frontable domain found: ' + str(hostname) + " " + str(target)
                         elif 'aspnetcdn.com' in target:
