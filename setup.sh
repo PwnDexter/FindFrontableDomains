@@ -6,6 +6,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 pip uninstall -y dnspython
 pip install -r requirements.txt
-git clone https://github.com/rvrsh3ll/Sublist3r.git
+git clone https://github.com/aboul3la/Sublist3r.git
 touch Sublist3r/__init__.py
 exit 1
