@@ -1,9 +1,9 @@
-#!/usr/bin/python
-# Run setup.sh first!
+#!/usr/bin/python3
+#Run setup.sh first!
 
 import dns.resolver
 import threading
-import Queue
+import queue
 import argparse
 import sys
 from Sublist3r import sublist3r
@@ -29,29 +29,29 @@ class ThreadLookup(threading.Thread):
                     for j in i.items:
                         target =  j.to_text()
                         if 'cloudfront' in target:
-                            print 'CloudFront Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("CloudFront Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'ghs.googlehosted.com' in target:
-                            print 'Google Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Google Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'appspot.com' in target:
-                            print 'Appspot (Old) Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Appspot (Old) Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'msecnd.net' in target:
-                            print 'Azure Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'aspnetcdn.com' in target:
-                            print 'Azure Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'azureedge.net' in target:
-                            print 'Azure Frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'a248.e.akamai.net' in target:
-                            print 'Akamai frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Akamai frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'secure.footprint.net' in target:
-                            print 'Level 3 URL frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Level 3 URL frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'cloudflare' in target:
-                            print 'Cloudflare frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Cloudflare frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'unbouncepages.com' in target:
-                            print 'Unbounce frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Unbounce frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'x.incapdns.net' in target:
-                            print 'Incapsula frontable domain found: ' +str(hostname) + " " + str(target)
+                            print("Incapsula frontable domain found: " +str(hostname) + " " + str(target))
                         elif 'fastly' in target:
-                            print 'Fastly URL frontable domain found: ' + str(hostname) + " " + str(target)
+                            print("Fastly URL frontable domain found: " + str(hostname) + " " + str(target))
             except Exception as e:
                 pass
             self.queue.task_done()
@@ -67,35 +67,45 @@ def main():
     check=args.check
     file = args.file
     domain = args.domain
-    queue = Queue.Queue()
+
+    from colorama import init
+    init(strip=not sys.stdout.isatty()) # strip colors if stdout is redirected
+    from termcolor import cprint 
+    from pyfiglet import figlet_format
+
+    cprint(figlet_format('Find'))
+    cprint(figlet_format('Frontable'))
+    cprint(figlet_format('Domains'))
+
+    q = queue.Queue()
     if file:
         with open(file, 'r') as f:
             for d in f:
                 d = d.rstrip()
                 if d:
-                    queue.put(d)   
+                    q.put(d)   
     elif check:
-        queue.put(check)       
+        q.put(check)       
     elif domain:
         subdomains = []
         subdomains = sublist3r.main(domain, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
         for i in subdomains:
-            print i
-            queue.put(i)
+            print(i)
+            q.put(i)
     else:
-        print "No Input Detected!"
+        print("No Input Detected!")
         sys.exit()
-    print "---------------------------------------------------------"
-    print "Starting search for frontable domains..."
+    print("---------------------------------------------------------")
+    print("Starting search for frontable domains...")
     # spawn a pool of threads and pass them queue instance
     for i in range(threads):
-        t = ThreadLookup(queue)
+        t = ThreadLookup(q)
         t.setDaemon(True)
         t.start()
     
-    queue.join()
-    print ""
-    print "Search complete!"
+    q.join()
+    print("")
+    print("Search complete!")
 
 if __name__ == "__main__":
     main()
