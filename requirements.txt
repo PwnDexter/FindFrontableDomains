@@ -5,3 +5,4 @@ pyfiglet
 termcolor
 colorama
 sslscan
+setuptools
