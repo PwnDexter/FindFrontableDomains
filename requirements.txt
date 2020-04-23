@@ -1,3 +1,7 @@
 argparse
 dnspython
 requests
+pyfiglet
+termcolor
+colorama
+sslscan
