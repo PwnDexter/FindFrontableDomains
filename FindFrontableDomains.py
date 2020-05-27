@@ -9,6 +9,7 @@ import sys
 import sslscan
 import subprocess
 from Sublist3r import sublist3r
+from datetime import datetime
 
 class ThreadLookup(threading.Thread):
     def __init__(self, queue):
@@ -93,10 +94,9 @@ def main():
                 if d:
                     q.put(d)   
     elif recursive:
-        with open('./SubdomainsFound.txt', 'w') as log:
+        with open('./Subdomains-Found-%s.txt'%datetime.now().strftime('%d-%m-%Y_%H:%M'), 'w') as log:
             with open(recursive, 'r') as f:
                 for d in f:
-                    print('Examining ' +d)
                     d = d.rstrip()
                     if d:
                         q.put(d)
