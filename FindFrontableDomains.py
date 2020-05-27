@@ -71,7 +71,7 @@ def main():
     parser.add_argument('-r', '--recursive', type=str, required=False)
     args = parser.parse_args()
     threads =  args.threads
-    check=args.check
+    check = args.check
     file = args.file
     domain = args.domain
     recursive = args.recursive
@@ -99,17 +99,17 @@ def main():
                     print('Examining ' +d)
                     d = d.rstrip()
                     if d:
-                        q.put(d)   
+                        q.put(d)
                         subdomains = []
                         subdomains = sublist3r.main(d, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
                         for i in subdomains:
                             log.write(i + '\n')
                             print(i)
                             q.put(i)
-
     elif check:
         q.put(check)       
     elif domain:
+        q.put(domain)
         subdomains = []
         subdomains = sublist3r.main(domain, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
         for i in subdomains:
