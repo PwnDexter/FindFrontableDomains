@@ -87,6 +87,7 @@ def main():
     elif check:
         q.put(check)       
     elif domain:
+        q.put(domain)
         subdomains = []
         subdomains = sublist3r.main(domain, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
         for i in subdomains:
