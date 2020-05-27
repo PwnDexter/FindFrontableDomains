@@ -6,6 +6,8 @@ import threading
 import queue
 import argparse
 import sys
+import sslscan
+import subprocess
 from Sublist3r import sublist3r
 
 class ThreadLookup(threading.Thread):
@@ -34,11 +36,15 @@ class ThreadLookup(threading.Thread):
                             print("Google Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'appspot.com' in target:
                             print("Appspot (Old) Frontable domain found: " + str(hostname) + " " + str(target))
-                        elif 'msecnd.net' in target:
-                            print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
-                        elif 'aspnetcdn.com' in target:
-                            print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
-                        elif 'azureedge.net' in target:
+                        elif 'aspnetcdn.com' in target or 'azureedge.net' in target or 'msecnd.net' in target :
+                            try:
+                                response=subprocess.getoutput(f'pysslscan scan --scan=protocol.http --scan=server.ciphers --tls10 {str(hostname)} | grep Accepted | wc -l')
+                                if int(response) > 0:
+                                    print("\033[92mAzure Frontable domain found: " + str(hostname) + " " + str(target) + '\033[0m')
+                                    continue
+                            except Exception as e:
+                                print(e)
+                                pass
                             print("Azure Frontable domain found: " + str(hostname) + " " + str(target))
                         elif 'a248.e.akamai.net' in target:
                             print("Akamai frontable domain found: " + str(hostname) + " " + str(target))
@@ -59,14 +65,16 @@ class ThreadLookup(threading.Thread):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', type=str, required=False)
-    parser.add_argument('-t', '--threads', type=int, required=False, default=10)
+    parser.add_argument('-t', '--threads', type=int, required=False, default=20)
     parser.add_argument('-d', '--domain', type=str, required=False)
     parser.add_argument('-c', '--check', type=str, required=False)
+    parser.add_argument('-r', '--recursive', type=str, required=False)
     args = parser.parse_args()
     threads =  args.threads
     check=args.check
     file = args.file
     domain = args.domain
+    recursive = args.recursive
 
     from colorama import init
     init(strip=not sys.stdout.isatty()) # strip colors if stdout is redirected
@@ -84,10 +92,24 @@ def main():
                 d = d.rstrip()
                 if d:
                     q.put(d)   
+    elif recursive:
+        with open('./SubdomainsFound.txt', 'w') as log:
+            with open(recursive, 'r') as f:
+                for d in f:
+                    print('Examining ' +d)
+                    d = d.rstrip()
+                    if d:
+                        q.put(d)   
+                        subdomains = []
+                        subdomains = sublist3r.main(d, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
+                        for i in subdomains:
+                            log.write(i + '\n')
+                            print(i)
+                            q.put(i)
+
     elif check:
         q.put(check)       
     elif domain:
-        q.put(domain)
         subdomains = []
         subdomains = sublist3r.main(domain, threads, savefile=None, ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
         for i in subdomains:
